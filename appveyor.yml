@@ -1,0 +1,35 @@
+version: 1.0.{build}
+
+# Specify the image to use for the build
+image: Visual Studio 2019
+
+# Define the environment variables
+environment:
+  ARIA2_VERSION: "1.35.0"
+
+# Install dependencies (install aria2, for example)
+install:
+  - ps: |
+      Invoke-WebRequest -Uri "https://github.com/aria2/aria2/releases/download/release-$env:ARIA2_VERSION/aria2-$env:ARIA2_VERSION-win-64bit-build1.zip" -OutFile "aria2.zip"
+      Expand-Archive -Path "aria2.zip" -DestinationPath "C:\Program Files\aria2"
+      Remove-Item -Path "aria2.zip"
+
+# Define build steps
+build:
+  # Run aria2 to download files in parallel
+  script:
+    - ps: |
+        # Define a list of URLs to download
+        $urls = @(
+          "https://example.com/file1.zip",
+          "https://example.com/file2.zip",
+          "https://example.com/file3.zip"
+        )
+        
+        # Specify the output directory
+        $outputDir = "C:\downloads"
+        New-Item -Path $outputDir -ItemType Directory -Force
+
+        # Start parallel downloads with aria2c
+        foreach ($url in $urls) {
+          Star
