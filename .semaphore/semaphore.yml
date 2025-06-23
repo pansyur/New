@@ -1,36 +1,54 @@
-version: v1.0
-name: Torrent Download and Upload
+version: 'v1.0'
+
+name: Torrent Download with aria2c on Different Machine
+
 agent:
   machine:
-    type: e1-standard-2
-    os_image: ubuntu2004
+    type: e2-standard-4   # Different machine type
+
 blocks:
   - name: Install Dependencies
     task:
       jobs:
-        - name: Install webtorrent-cli
+        - name: Install aria2c
           commands:
-            - 'apt update && apt upgrade '
-            - apt install aria2 -y
-  - name: Download Torrent
+            - echo "Updating package list..."
+            - sudo apt-get update
+            - echo "Installing aria2..."
+            - sudo apt-get install -y aria2
+
+  - name: Download Files with aria2c
     task:
       jobs:
-        - name: Download Files
+        - name: Download Torrent
           commands:
             - echo "Creating download directory..."
-            - mkdir -p ~/downloaded_files
-            - echo "Starting torrent download..."
-            - >-
-              aria2c --seed-time=0
-              "magnet:?xt=urn:btih:8253f79dc1c2bd8d266c4c0d46299458cb50be02&dn=KPop+Demon+Hunters+2025+1080p+NF+WEB-DL+DDP5+1+Atmos+H+264-FLUX%20%20%20%20%20%20%20%20&tr=udp://tracker.bittor.pw:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.opentrackr.org:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.dler.org:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.stealth.si:80/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.torrent.eu.org:451/announce%20%20%20%20%20%20%20%20&tr=udp://exodus.desync.com:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.demonii.com:1337/announce"
-              -d ~/downloaded_files
-            - echo "Listing files after download..."
-            - ls -l ~/downloaded_files
-            - 'if [ "$(ls -A ~/downloaded_files)" ]; then echo "Download successful."; else echo "No files downloaded. Check magnet link or seeders."; exit 1; fi'
+            - mkdir -p /tmp/downloads
+            - echo "Starting download with aria2c..."
+            - aria2c --seed-time=0 --dir=/tmp/downloads "magnet:?xt=urn:btih:8253f79dc1c2bd8d266c4c0d46299458cb50be02&dn=KPop+Demon+Hunters+2025+1080p+NF+WEB-DL+DDP5+1+Atmos+H+264-FLUX%20%20%20%20%20%20%20%20&tr=udp://tracker.bittor.pw:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.opentrackr.org:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.dler.org:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.stealth.si:80/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.torrent.eu.org:451/announce%20%20%20%20%20%20%20%20&tr=udp://exodus.desync.com:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.demonii.com:1337/announce"
+            - echo "Listing downloaded files..."
+            - ls -l /tmp/downloads
+            - if [ "$(ls -A /tmp/downloads)" ]; then
+                echo "Download completed successfully.";
+              else
+                echo "No files downloaded. Check magnet link or seeders.";
+                exit 1;
+              fi
+
   - name: Upload Files to Filebin
     task:
       jobs:
         - name: Upload Files
           commands:
             - BIN_NAME="fn5l2fc0lh3bplas"
-            - 'for file in ~/downloaded_files/*; do filename=$(basename "$file") echo "Uploading $filename..." response=$(curl -s -w "%{http_code}" --data-binary @"$file" "https://filebin.net/$BIN_NAME/$filename") http_code=$(echo "$response" | tail -n1) if [ "$http_code" != "200" ]; then echo "Failed to upload $filename" else echo "$filename uploaded successfully." fi done'
+            - for file in /tmp/downloads/*; do
+                filename=$(basename "$file")
+                echo "Uploading $filename..."
+                response=$(curl -s -w "%{http_code}" --upload-file "$file" "https://filebin.net/$BIN_NAME/$filename")
+                http_code=$(echo "$response" | tail -n1)
+                if [ "$http_code" != "200" ]; then
+                  echo "Failed to upload $filename"
+                else
+                  echo "$filename uploaded successfully."
+                fi
+              done
