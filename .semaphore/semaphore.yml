@@ -10,6 +10,7 @@ blocks:
       jobs:
         - name: Install webtorrent-cli
           commands:
+            - 'apt update && apt upgrade '
             - apt install aria2 -y
   - name: Download Torrent
     task:
