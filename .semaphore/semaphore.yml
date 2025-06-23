@@ -1,13 +1,42 @@
-version: v1.0
-name: Initial Pipeline
+version: 'v1.0'
+name: Download and Upload Torrent Files
+
 agent:
   machine:
-    type: f1-standard-2
-    os_image: ubuntu2204
+    type: e1-standard-2  # Choose an appropriate machine type
+
 blocks:
-  - name: 'Block #1'
+  - name: Install Dependencies
     task:
       jobs:
-        - name: 'Job #1'
+        - name: Install Node.js and webtorrent-cli
           commands:
-            - checkout
+            - sudo apt-get update
+            - sudo apt-get install -y curl nodejs npm
+            - npm install -g webtorrent-cli
+
+  - name: Download Torrent
+    task:
+      jobs:
+        - name: Download Torrent Files
+          commands:
+            - mkdir -p ~/downloaded_files
+            - webtorrent download "magnet:?xt=urn:btih:86B445126B4BA01A726D5EC9484F1E4F0F0B7334&dn=Evil%20Lives%20Here%20The%20Killer%20Speaks%20S02E08%20She%20Was%20All%20Darkness%201080p%20AMZN%20WEB-DL%20DDP2%200%20H%20264-RAWR%5BEZTVx.to%5D.mkv%5Beztv%5D" --out ~/downloaded_files || echo "Download failed"
+
+  - name: Upload Files to Filebin
+    task:
+      jobs:
+        - name: Upload Files
+          commands:
+            - BIN_NAME="my-new-bin-$(date +%s)"  # Unique bin name
+            - for file in ~/downloaded_files/*; do
+                filename=$(basename "$file")
+                echo "Uploading $filename..."
+                response=$(curl -s -w "%{http_code}" -X POST --data-binary @"$file" "https://filebin.net/$BIN_NAME/$filename")
+                http_code=$(echo "$response" | tail -n1)
+                if [ "$http_code" != "200" ]; then
+                  echo "Failed to upload $filename"
+                else
+                  echo "$filename uploaded successfully."
+                fi
+              done
