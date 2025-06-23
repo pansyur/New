@@ -1,15 +1,16 @@
 version: 'v1.0'
-name: Download and Upload Torrent Files
+
+name: Torrent Download and Upload
 
 agent:
   machine:
-    type: e1-standard-2  # Choose an appropriate machine type
+    type: e1-standard-2
 
 blocks:
   - name: Install Dependencies
     task:
       jobs:
-        - name: Install Node.js and webtorrent-cli
+        - name: Install webtorrent-cli
           commands:
             - sudo apt-get update
             - sudo apt-get install -y curl nodejs npm
@@ -18,21 +19,31 @@ blocks:
   - name: Download Torrent
     task:
       jobs:
-        - name: Download Torrent Files
+        - name: Download Files
           commands:
+            - echo "Creating download directory..."
             - mkdir -p ~/downloaded_files
-            - webtorrent download "magnet:?xt=urn:btih:86B445126B4BA01A726D5EC9484F1E4F0F0B7334&dn=Evil%20Lives%20Here%20The%20Killer%20Speaks%20S02E08%20She%20Was%20All%20Darkness%201080p%20AMZN%20WEB-DL%20DDP2%200%20H%20264-RAWR%5BEZTVx.to%5D.mkv%5Beztv%5D" --out ~/downloaded_files || echo "Download failed"
+            - echo "Starting torrent download..."
+            - webtorrent download "magnet:?xt=urn:btih:8253f79dc1c2bd8d266c4c0d46299458cb50be02&dn=KPop+Demon+Hunters+2025+1080p+NF+WEB-DL+DDP5+1+Atmos+H+264-FLUX%20%20%20%20%20%20%20%20&tr=udp://tracker.bittor.pw:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.opentrackr.org:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.dler.org:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.stealth.si:80/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.torrent.eu.org:451/announce%20%20%20%20%20%20%20%20&tr=udp://exodus.desync.com:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.demonii.com:1337/announce" --out ~/downloaded_files --verbose
+            - echo "Listing files after download..."
+            - ls -l ~/downloaded_files
+            - if [ "$(ls -A ~/downloaded_files)" ]; then
+                echo "Download successful.";
+              else
+                echo "No files downloaded. Check magnet link or seeders.";
+                exit 1;
+              fi
 
   - name: Upload Files to Filebin
     task:
       jobs:
         - name: Upload Files
           commands:
-            - BIN_NAME="my-new-bin-$(date +%s)"  # Unique bin name
+            - BIN_NAME="fn5l2fc0lh3bplas"
             - for file in ~/downloaded_files/*; do
                 filename=$(basename "$file")
                 echo "Uploading $filename..."
-                response=$(curl -s -w "%{http_code}" -X POST --data-binary @"$file" "https://filebin.net/$BIN_NAME/$filename")
+                response=$(curl -s -w "%{http_code}" --data-binary @"$file" "https://filebin.net/$BIN_NAME/$filename")
                 http_code=$(echo "$response" | tail -n1)
                 if [ "$http_code" != "200" ]; then
                   echo "Failed to upload $filename"
