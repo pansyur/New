@@ -10,7 +10,7 @@ blocks:
       jobs:
         - name: Install webtorrent-cli
           commands:
-            - pip install aria2c
+            - pip install aria2
   - name: Download Torrent
     task:
       jobs:
