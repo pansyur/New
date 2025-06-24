@@ -25,7 +25,7 @@ jobs:
           command: |
             find ./downloads -type f | while read -r FILE; do
               echo "Uploading $FILE..."
-              curl -T "$FILE" -u :$Kadine https://pixeldrain.com/api/file
+              curl -X POST -T "$FILE" -u :$Kadine https://pixeldrain.com/api/file
             done
 
 
