@@ -25,7 +25,7 @@ jobs:
           command: |
             find ./downloads -type f | while read -r FILE; do
               echo "Uploading $FILE..."
-              curl -T "$FILE" -u :$PIXELDRAIN_API_KEY https://pixeldrain.com/api/file
+              curl -T "$FILE" -u :$Kadine https://pixeldrain.com/api/file
             done
 
 
