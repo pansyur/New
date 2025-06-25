@@ -1,6 +1,6 @@
 version: v1.0
 
-name: Download Torrent and Upload to PixelDrain
+name: Download Torrent and Upload to Filebin
 
 agent:
   machine:
@@ -8,65 +8,64 @@ agent:
     os_image: ubuntu2004
 
 blocks:
-  - name: Download & Upload
-    task:
-      env_vars:
-        - name: PIXELDRAIN_API_KEY
-          value: 5f45f184-64bb-4eaa-be19-4a5f0459db49   # 🔐 Replace with your actual key
-        - name: TORRENT_MAGNET
-          value: "magnet:?xt=urn:btih:..."              # 🔗 Replace with your magnet link
+  - name: Download & Upload         
       jobs:
         - name: Download and Upload Files
           commands:
             - checkout
-            - echo "Installing webtorrent-cli..."
+            - echo "Installing dependencies..."
             - sudo apt update
             - sudo apt install -y nodejs npm python3
             - pip install requests
             - npm install webtorrent-cli
-
             - echo "Downloading torrent..."
             - mkdir downloads
-            - npx webtorrent "magnet:?xt=urn:btih:B827925D3E6D87A212EEEAE2005ECDD6EA2B4763&dn=PC%20Gamer%20USA%20-%20August%202025&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
-            - echo "Uploading files to filebin..."
+            - npx webtorrent "magnet:?xt=urn:btih:8ABC6C59AB18F98856F19554F8502BA1A40726DC&dn=Sakurai%20K.%20X-ray%20Color%20Imaging.%20Static%20and%20dynamic%20X-ray%20fluorescence...2024&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
+            - echo "Uploading files to Filebin..."
             - cat <<'EOF' > upload_files.py
 import os
 import requests
 import concurrent.futures
 
+# Folder containing downloaded files
 directory = 'downloads'
-url_template = 'https://filebin.net/Sahaujwsh/{filename}'
+url_template = 'https://filebin.net/xx4gwonx76ay0bxu/{filename}'  # 🔁 Replace with your Filebin ID if needed
 
-if not os.path.exists(directory):
-    print(f"Directory {directory} does not exist.")
-    exit(1)
+# Recursively collect all file paths
+files_to_upload = []
+for root, dirs, files in os.walk(directory):
+    for file in files:
+        full_path = os.path.join(root, file)
+        files_to_upload.append(full_path)
 
+# Upload a single file
 def upload_file(file_path):
-    filename = os.path.basename(file_path)
-    print(f'Starting upload: {filename}')
+    filename = os.path.relpath(file_path, directory)
+    url = url_template.format(filename=filename.replace(os.sep, '_'))  # flatten structure
+
+    print(f'Uploading {filename} to {url}')
     try:
         with open(file_path, 'rb') as f:
-            response = requests.post(url_template.format(filename=filename), headers={
-                'accept': 'application/json',
-                'Content-Type': 'application/octet-stream'
-            }, data=f)
-        try:
-            response_data = response.json()
-        except Exception:
-            response_data = response.text
-        print(f'Finished upload: {filename} with status {response.status_code}')
-        return filename, response.status_code, response_data
+            response = requests.post(
+                url,
+                headers={
+                    'accept': 'application/json',
+                    'Content-Type': 'application/octet-stream'
+                },
+                data=f
+            )
+        return response.status_code, filename, response.json()
     except Exception as e:
-        print(f'Failed to upload {filename}: {e}')
-        return filename, None, str(e)
+        return None, filename, str(e)
 
-files = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-
+# Concurrent upload
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    futures = [executor.submit(upload_file, file) for file in files]
-    for future in concurrent.futures.as_completed(futures):
-        filename, status_code, response_data = future.result()
-        print(f'Uploaded {filename}: Status {status_code}, Response: {response_data}')
+    future_to_file = {executor.submit(upload_file, file): file for file in files_to_upload}
+    for future in concurrent.futures.as_completed(future_to_file):
+        try:
+            status_code, filename, response_data = future.result()
+            print(f'Uploaded {filename}: Status {status_code}, Response: {response_data}')
+        except Exception as e:
+            print(f'Error uploading {future_to_file[future]}: {e}')
 EOF
             - python3 upload_files.py
-  
