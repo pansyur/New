@@ -16,9 +16,9 @@ blocks:
             - checkout
             - echo "Installing dependencies..."
             - sudo apt update
-            - sudo apt install -y nodejs npm python3 python3-pip
-            - pip3 install requests
-            - npm install -g webtorrent-cli
+            - sudo apt install -y nodejs npm python3
+            - pip install requests
+            - npm install webtorrent-cli
             - echo "Downloading torrent..."
             - mkdir downloads
             - npx webtorrent "magnet:?xt=urn:btih:8ABC6C59AB18F98856F19554F8502BA1A40726DC&dn=Sakurai%20K.%20X-ray%20Color%20Imaging.%20Static%20and%20dynamic%20X-ray%20fluorescence...2024&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
