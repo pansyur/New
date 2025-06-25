@@ -21,7 +21,7 @@ blocks:
             - checkout
             - echo "Installing webtorrent-cli..."
             - sudo apt update
-            - sudo apt install -y nodejs npm
+            - sudo apt install -y nodejs npm python3
             - pip install requests
             - npm install webtorrent-cli
 
