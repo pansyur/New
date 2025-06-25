@@ -1,54 +1,33 @@
-version: 'v1.0'
+version: v1.0
 
-name: Torrent Download with aria2c on Different Machine
+name: Download Torrent and Upload to PixelDrain
 
 agent:
   machine:
-    type: e2-standard-4   # Different machine type
+    type: e1-standard-2
+    os_image: ubuntu2004
 
 blocks:
-  - name: Install Dependencies
+  - name: Download & Upload
     task:
+      env_vars:
+        - name: PIXELDRAIN_API_KEY
+          value: 5f45f184-64bb-4eaa-be19-4a5f0459db49   # 🔐 Replace with your actual key
+        - name: TORRENT_MAGNET
+          value: "magnet:?xt=urn:btih:..."              # 🔗 Replace with your magnet link
       jobs:
-        - name: Install aria2c
+        - name: Download and Upload Files
           commands:
-            - echo "Updating package list..."
-            - sudo apt-get update
-            - echo "Installing aria2..."
-            - sudo apt-get install -y aria2
+            - checkout
+            - echo "Installing webtorrent-cli..."
+            - sudo apt update
+            - sudo apt install -y nodejs npm
+            - pip install requests
+            - npm install webtorrent-cli
 
-  - name: Download Files with aria2c
-    task:
-      jobs:
-        - name: Download Torrent
-          commands:
-            - echo "Creating download directory..."
-            - mkdir -p /tmp/downloads
-            - echo "Starting download with aria2c..."
-            - aria2c --seed-time=0 --dir=/tmp/downloads "magnet:?xt=urn:btih:8253f79dc1c2bd8d266c4c0d46299458cb50be02&dn=KPop+Demon+Hunters+2025+1080p+NF+WEB-DL+DDP5+1+Atmos+H+264-FLUX%20%20%20%20%20%20%20%20&tr=udp://tracker.bittor.pw:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.opentrackr.org:1337/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.dler.org:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.stealth.si:80/announce%20%20%20%20%20%20%20%20&tr=udp://tracker.torrent.eu.org:451/announce%20%20%20%20%20%20%20%20&tr=udp://exodus.desync.com:6969/announce%20%20%20%20%20%20%20%20&tr=udp://open.demonii.com:1337/announce"
-            - echo "Listing downloaded files..."
-            - ls -l /tmp/downloads
-            - if [ "$(ls -A /tmp/downloads)" ]; then
-                echo "Download completed successfully.";
-              else
-                echo "No files downloaded. Check magnet link or seeders.";
-                exit 1;
-              fi
-
-  - name: Upload Files to Filebin
-    task:
-      jobs:
-        - name: Upload Files
-          commands:
-            - BIN_NAME="fn5l2fc0lh3bplas"
-            - for file in /tmp/downloads/*; do
-                filename=$(basename "$file")
-                echo "Uploading $filename..."
-                response=$(curl -s -w "%{http_code}" --upload-file "$file" "https://filebin.net/$BIN_NAME/$filename")
-                http_code=$(echo "$response" | tail -n1)
-                if [ "$http_code" != "200" ]; then
-                  echo "Failed to upload $filename"
-                else
-                  echo "$filename uploaded successfully."
-                fi
-              done
+            - echo "Downloading torrent..."
+            - mkdir downloads
+            - npx webtorrent "magnet:?xt=urn:btih:B827925D3E6D87A212EEEAE2005ECDD6EA2B4763&dn=PC%20Gamer%20USA%20-%20August%202025&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
+            - echo "Uploading files to filebin..."
+            - curl -o filebin.py "https://uc83795c4fca3e3749ffdb6c4b12.dl.dropboxusercontent.com/cd/0/get/CsVJS6QKA1n0EqZp1-kgNhpGQpsXfxOb6E8OLCUK2GBdkpEs5GJOgpiVAFg5SFfDKCL_WGlU6ct2InI34HzHkYuDdT-dK5x-PYnPH6LQ6wFFJJnzPraOoPQ6TzpB2MXv8km91ALoilLHQtXkb28_Gkosq9bAOHyt_jUMm8GvKRuncQ/file?_download_id=9634947189151869003008792282545580488480366248539039192318958628791&_log_download_success=1#"
+            - python filebin.py
