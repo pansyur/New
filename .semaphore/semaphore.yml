@@ -8,64 +8,66 @@ agent:
     os_image: ubuntu2004
 
 blocks:
-  - name: Download & Upload         
+  - name: Download & Upload
+    task:
       jobs:
         - name: Download and Upload Files
           commands:
             - checkout
             - echo "Installing dependencies..."
             - sudo apt update
-            - sudo apt install -y nodejs npm python3
-            - pip install requests
-            - npm install webtorrent-cli
+            - sudo apt install -y nodejs npm python3 python3-pip
+            - pip3 install requests
+            - npm install -g webtorrent-cli
             - echo "Downloading torrent..."
             - mkdir downloads
             - npx webtorrent "magnet:?xt=urn:btih:8ABC6C59AB18F98856F19554F8502BA1A40726DC&dn=Sakurai%20K.%20X-ray%20Color%20Imaging.%20Static%20and%20dynamic%20X-ray%20fluorescence...2024&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
             - echo "Uploading files to Filebin..."
-            - cat <<'EOF' > upload_files.py
-import os
-import requests
-import concurrent.futures
+            - |
+              cat << 'EOF' > upload_files.py
+              import os
+              import requests
+              import concurrent.futures
 
-# Folder containing downloaded files
-directory = 'downloads'
-url_template = 'https://filebin.net/xx4gwonx76ay0bxu/{filename}'  # 🔁 Replace with your Filebin ID if needed
+              # Folder containing downloaded files
+              directory = 'downloads'
+              url_template = 'https://filebin.net/xx4gwonx76ay0bxu/{filename}'  # Replace with your Filebin ID
 
-# Recursively collect all file paths
-files_to_upload = []
-for root, dirs, files in os.walk(directory):
-    for file in files:
-        full_path = os.path.join(root, file)
-        files_to_upload.append(full_path)
+              # Recursively collect all file paths
+              files_to_upload = []
+              for root, dirs, files in os.walk(directory):
+                  for file in files:
+                      full_path = os.path.join(root, file)
+                      files_to_upload.append(full_path)
 
-# Upload a single file
-def upload_file(file_path):
-    filename = os.path.relpath(file_path, directory)
-    url = url_template.format(filename=filename.replace(os.sep, '_'))  # flatten structure
+              # Upload a single file
+              def upload_file(file_path):
+                  filename = os.path.relpath(file_path, directory)
+                  url = url_template.format(filename=filename.replace(os.sep, '_'))
 
-    print(f'Uploading {filename} to {url}')
-    try:
-        with open(file_path, 'rb') as f:
-            response = requests.post(
-                url,
-                headers={
-                    'accept': 'application/json',
-                    'Content-Type': 'application/octet-stream'
-                },
-                data=f
-            )
-        return response.status_code, filename, response.json()
-    except Exception as e:
-        return None, filename, str(e)
+                  print(f'Uploading {filename} to {url}')
+                  try:
+                      with open(file_path, 'rb') as f:
+                          response = requests.post(
+                              url,
+                              headers={
+                                  'accept': 'application/json',
+                                  'Content-Type': 'application/octet-stream'
+                              },
+                              data=f
+                          )
+                      return response.status_code, filename, response.json()
+                  except Exception as e:
+                      return None, filename, str(e)
 
-# Concurrent upload
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    future_to_file = {executor.submit(upload_file, file): file for file in files_to_upload}
-    for future in concurrent.futures.as_completed(future_to_file):
-        try:
-            status_code, filename, response_data = future.result()
-            print(f'Uploaded {filename}: Status {status_code}, Response: {response_data}')
-        except Exception as e:
-            print(f'Error uploading {future_to_file[future]}: {e}')
-EOF
+              # Concurrent upload
+              with concurrent.futures.ThreadPoolExecutor() as executor:
+                  future_to_file = {executor.submit(upload_file, file): file for file in files_to_upload}
+                  for future in concurrent.futures.as_completed(future_to_file):
+                      try:
+                          status_code, filename, response_data = future.result()
+                          print(f'Uploaded {filename}: Status {status_code}, Response: {response_data}')
+                      except Exception as e:
+                          print(f'Error uploading {future_to_file[future]}: {e}')
+              EOF
             - python3 upload_files.py
