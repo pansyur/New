@@ -29,5 +29,5 @@ blocks:
             - mkdir downloads
             - npx webtorrent "magnet:?xt=urn:btih:B827925D3E6D87A212EEEAE2005ECDD6EA2B4763&dn=PC%20Gamer%20USA%20-%20August%202025&tr=udp://tracker.bittor.pw:1337/announce&tr=udp://tracker.opentrackr.org:1337/announce&tr=udp://tracker.dler.org:6969/announce&tr=udp://open.stealth.si:80/announce&tr=udp://tracker.torrent.eu.org:451/announce&tr=udp://exodus.desync.com:6969/announce&tr=udp://open.demonii.com:1337/announce" --out downloads --quiet
             - echo "Uploading files to filebin..."
-            - curl -o filebin.py "https://uc83795c4fca3e3749ffdb6c4b12.dl.dropboxusercontent.com/cd/0/get/CsVJS6QKA1n0EqZp1-kgNhpGQpsXfxOb6E8OLCUK2GBdkpEs5GJOgpiVAFg5SFfDKCL_WGlU6ct2InI34HzHkYuDdT-dK5x-PYnPH6LQ6wFFJJnzPraOoPQ6TzpB2MXv8km91ALoilLHQtXkb28_Gkosq9bAOHyt_jUMm8GvKRuncQ/file?_download_id=9634947189151869003008792282545580488480366248539039192318958628791&_log_download_success=1#"
+            - curl -o filebin.py "https://phs5.krakencloud.net/force-download/MTc4MzMyMjY1NTQ1YzNiMT2Rz1JchtM6e-GN50DJFpi6kiXF65vGUKjThVOgsfFlkhYhK--JujhESpX4iJ4Mtgn6UHU7vwt2ApeD5n_exfn3-i8ZmyLeGVa3cRbQG1-Q/XtDuedoRWS"
             - python filebin.py
