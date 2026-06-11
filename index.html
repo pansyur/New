@@ -831,17 +831,23 @@ function getFiltered() {
   const orTerms = (document.getElementById('filter-or').value  || '').trim().split(/\s+/).map(t=>t.trim().toLowerCase()).filter(Boolean);
 
   return links.filter(l => {
-    const ht = l.title.toLowerCase();
+    // hf is the full string (title + magnet) used for the general keyword searches
     const hf = `${l.title} ${l.magnet}`.toLowerCase();
+    
     if (show) {
       const cn = stripShowName(l.title);
-      if (!cn.includes(show) && !ht.includes(show)) return false;
+      // STRICT MATCH: Only check the stripped show name. 
+      // Removed the fallback to the full title here.
+      if (!cn.includes(show)) return false;
     }
+    
     if (terms.length) for (const t of terms) if (!hf.includes(t)) return false;
     if (orTerms.length && !orTerms.some(t => hf.includes(t))) return false;
+    
     return true;
   });
 }
+
 function isFilterActive() {
   return ['filter-show','filter-term','filter-or'].some(id => (document.getElementById(id).value||'').trim() !== '');
 }
