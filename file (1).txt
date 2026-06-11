@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Magnet Vault ✦ Butterfly Edition</title>
+<style>
+  /* ── Google Fonts ─────────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Dancing+Script:wght@600&display=swap');
+
+  /* ── CSS Variables (Light Theme Transformation) ──────────────── */
+  :root {
+    --pink:       #db2777; /* Deeper pink for excellent light-mode contrast */
+    --pink-light: #fdf2f8;
+    --pink-deep:  #be185d;
+    --blue:       #4f46e5; /* Strong indigo-blue */
+    --blue-light: #e0e7ff;
+    --blue-deep:  #3730a3;
+    --bg:         #faf6fe; /* Bright, soft pastel pink/lavender tint */
+    --surface:    #f3e8ff; /* Lavender mist */
+    --card:       #ffffff; /* Pure white cards */
+    --border:     rgba(219,39,119,0.25); /* Subtle pink borders */
+    --border-blue:rgba(79,70,229,0.25);
+    --fg:         #2e1049; /* Deep royal violet for readable text */
+    --muted:      #6b4e8d; /* Rich medium purple-gray for secondary text */
+    --destructive:#e11d48;
+    --radius:     0.6rem;
+    --mono:       'Space Mono', monospace;
+    --display:    'Dancing Script', cursive;
+  }
+
+  /* ── Animations ──────────────────────────────────────────────── */
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50%       { opacity: 0.8; transform: scale(1.2) rotate(180deg); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(-3deg); }
+    50%       { transform: translateY(-8px) rotate(3deg); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  @keyframes wingFlap {
+    0%, 100% { transform: scaleX(1); }
+    50%       { transform: scaleX(0.7); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  @keyframes drift {
+    0%   { transform: translateX(0) translateY(0) rotate(0deg); }
+    33%  { transform: translateX(30px) translateY(-20px) rotate(15deg); }
+    66%  { transform: translateX(-20px) translateY(15px) rotate(-10deg); }
+    100% { transform: translateX(0) translateY(0) rotate(0deg); }
+  }
+  .spin { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+  /* ── Reset ───────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--mono);
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ── Background ambient sparkles (Adapted to Light Theme) ─────── */
+  .sparkle-field {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .sparkle-field::before,
+  .sparkle-field::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 10% 15%, #db2777 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 25% 40%, #4f46e5 0%, transparent 100%),
+      radial-gradient(1px 1px at 40% 10%, #ec4899 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 55% 60%, #8b5cf6 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 30%, #f43f5e 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 80% 75%, #4f46e5 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 20%, #db2777 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 15% 70%, #a78bfa 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 85%, #f472b6 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 35% 90%, #4f46e5 0%, transparent 100%);
+    background-size: 200px 200px;
+    opacity: 0.45;
+    animation: shimmer 8s linear infinite;
+  }
+
+  /* ── Floating butterflies (decorative swarm) ──────────────────── */
+  .butterfly-bg {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.18;
+    font-size: 2rem;
+    animation: drift 20s ease-in-out infinite;
+  }
+  .butterfly-bg:nth-child(1) { top: 10%; left: 5%;  animation-duration: 18s; font-size: 1.5rem; }
+  .butterfly-bg:nth-child(2) { top: 60%; right: 8%; animation-duration: 22s; animation-delay: -5s; }
+  .butterfly-bg:nth-child(3) { top: 30%; right: 20%;animation-duration: 25s; animation-delay: -10s; font-size: 1.2rem; }
+  .butterfly-bg:nth-child(4) { bottom: 20%; left: 15%; animation-duration: 28s; animation-delay: -3s; }
+  .butterfly-bg:nth-child(5) { top: 80%; left: 40%; animation-duration: 21s; animation-delay: -2s; font-size: 1.8rem; }
+  .butterfly-bg:nth-child(6) { top: 15%; right: 45%; animation-duration: 26s; animation-delay: -7s; font-size: 1.1rem; }
+  .butterfly-bg:nth-child(7) { bottom: 5%; right: 15%; animation-duration: 19s; animation-delay: -1s; font-size: 2.2rem; }
+  .butterfly-bg:nth-child(8) { top: 45%; left: 25%; animation-duration: 23s; animation-delay: -12s; font-size: 1.4rem; }
+  .butterfly-bg:nth-child(9) { top: 75%; right: 35%; animation-duration: 20s; animation-delay: -8s; font-size: 1.6rem; }
+  .butterfly-bg:nth-child(10) { bottom: 35%; left: 5%; animation-duration: 27s; animation-delay: -4s; font-size: 1.3rem; }
+
+  /* ── Page wrapper ─────────────────────────────────────────────── */
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* ── Header ──────────────────────────────────────────────────── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.875rem;
+    animation: fadeIn 0.5s ease both;
+  }
+  .header-icon {
+    width: 2.25rem; height: 2.25rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, var(--pink), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(219,39,119,0.25);
+    animation: float 3s ease-in-out infinite;
+  }
+  .header-icon svg { width: 1.1rem; height: 1.1rem; color: #fff; }
+  h1 {
+    font-family: var(--display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--pink), var(--blue), var(--pink));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* ── Pantry Config Banner ─────────────────────────────────────── */
+  .config-banner {
+    background: #fff8eb;
+    border: 1.5px dashed var(--pink);
+    border-radius: var(--radius);
+    padding: 0.85rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.6;
+    animation: fadeIn 0.5s ease both;
+  }
+  .config-banner strong { color: var(--pink-deep); }
+  .config-banner code { background: #fff; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; border: 1px solid rgba(219,39,119,0.2); }
+
+  /* ── Inputs ──────────────────────────────────────────────────── */
+  .input-wrap { position: relative; flex: 1; }
+  .input-icon {
+    position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--muted);
+    width: 1rem; height: 1rem;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid rgba(129,140,248,0.3);
+    border-radius: var(--radius);
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.58rem 0.75rem 0.58rem 2.2rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea {
+    padding-left: 0.75rem;
+    resize: vertical;
+    min-height: 4.5rem;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 0 3px rgba(219,39,119,0.15);
+  }
+  input::placeholder, textarea::placeholder { color: rgba(107,78,141,0.5); }
+
+  /* ── Filter section ──────────────────────────────────────────── */
+  .filter-section {
+    display: flex; flex-direction: column; gap: 0.5rem;
+    animation: fadeIn 0.5s 0.05s ease both;
+  }
+  .filter-row { display: flex; flex-direction: column; gap: 0.5rem; }
+  @media (min-width: 520px) {
+    .filter-row { flex-direction: row; }
+  }
+
+  /* ── Status bar ──────────────────────────────────────────────── */
+  .status-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.7rem; color: var(--muted);
+    animation: fadeIn 0.5s 0.1s ease both;
+  }
+  .status-dot {
+    width: 0.5rem; height: 0.5rem; border-radius: 50%; flex-shrink: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .status-dot.connected    { background: var(--pink); box-shadow: 0 0 6px var(--pink); }
+  .status-dot.disconnected { background: var(--destructive); box-shadow: 0 0 6px var(--destructive); }
+  .status-label.connected    { color: var(--pink); font-weight: bold; }
+  .status-label.disconnected { color: var(--destructive); font-weight: bold; }
+  .status-count { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+
+  /* ── Action bar ──────────────────────────────────────────────── */
+  .action-bar {
+    display: flex; gap: 0.5rem; overflow-x: auto;
+    padding-bottom: 0.25rem;
+    animation: fadeIn 0.5s 0.15s ease both;
+  }
+  .action-bar::-webkit-scrollbar { height: 2px; }
+  .action-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 1px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    border-radius: var(--radius); padding: 0.45rem 0.85rem;
+    font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: all 0.15s;
+    border: 1.5px solid var(--border);
+    background: #ffffff;
+    color: var(--fg);
+    box-shadow: 0 2px 5px rgba(107,78,141,0.06);
+  }
+  .btn:hover:not(:disabled) {
+    border-color: var(--pink);
+    background: var(--pink-light);
+    box-shadow: 0 4px 10px rgba(219,39,119,0.15);
+  }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn svg { width: 0.85rem; height: 0.85rem; }
+  .btn-danger {
+    border-color: rgba(225,29,72,0.3);
+    color: var(--destructive);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background: #fff1f2;
+    border-color: var(--destructive);
+    box-shadow: 0 4px 10px rgba(225,29,72,0.15);
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), var(--blue));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(219,39,119,0.25);
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 15px rgba(219,39,119,0.35);
+    border-color: transparent;
+  }
+
+  /* ── Link list ───────────────────────────────────────────────── */
+  .link-list-wrap {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    max-height: 55vh;
+    overflow-y: auto;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.4);
+    animation: fadeIn 0.5s 0.2s ease both;
+  }
+  .link-list-wrap::-webkit-scrollbar { width: 4px; }
+  .link-list-wrap::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--pink), var(--blue));
+    border-radius: 2px;
+  }
+  .empty-state {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 3rem 1rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    background: #ffffff;
+    animation: fadeIn 0.5s ease both;
+  }
+  .link-row {
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.75rem;
+    box-shadow: 0 2px 6px rgba(107,78,141,0.04);
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    position: relative;
+  }
+  .link-row:hover {
+    background: #fff9fc;
+    border-color: var(--pink);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(219,39,119,0.08);
+  }
+  .link-row-inner { display: flex; align-items: flex-start; gap: 0.5rem; }
+  .link-meta { flex: 1; min-width: 0; }
+  .link-title-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin-bottom: 0.25rem; }
+  .link-title {
+    font-size: 0.8rem; font-weight: 700; color: var(--fg);
+    word-break: break-word;
+  }
+  .ep-badge {
+    background: rgba(79,70,229,0.1);
+    color: var(--blue-deep);
+    border: 1.5px solid rgba(79,70,229,0.25);
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .link-magnet {
+    font-size: 0.65rem;
+    color: var(--muted);
+    word-break: break-all;
+    line-height: 1.5;
+    margin-bottom: 0.2rem;
+  }
+  .link-date { font-size: 0.6rem; color: var(--muted); opacity: 0.8; }
+  .link-actions {
+    display: flex; flex-direction: column; gap: 0.3rem;
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .link-row:hover .link-actions { opacity: 1; }
+  .icon-btn {
+    width: 1.8rem; height: 1.8rem;
+    border-radius: 0.35rem;
+    border: 1.5px solid var(--border);
+    background: #ffffff;
+    color: var(--fg);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .icon-btn svg { width: 0.8rem; height: 0.8rem; }
+  .icon-btn:hover { border-color: var(--pink); background: var(--pink-light); }
+  .icon-btn.del { border-color: rgba(225,29,72,0.3); color: var(--destructive); }
+  .icon-btn.del:hover { background: #fff1f2; border-color: var(--destructive); }
+
+  /* ── Collapsible ─────────────────────────────────────────────── */
+  details {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(107,78,141,0.04);
+  }
+  details summary {
+    cursor: pointer;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--fg);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  .chevron {
+    width: 0.85rem; height: 0.85rem;
+    color: var(--muted);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details[open] .chevron { transform: rotate(90deg); }
+  .collapsible-body {
+    border-top: 1.5px solid var(--border);
+    padding: 0.875rem;
+    background: rgba(243,232,255,0.25);
+  }
+  .collapsible-body p.hint {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.6rem;
+  }
+
+  /* ── Priority List ───────────────────────────────────────────── */
+  .priority-list { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.75rem; }
+  .priority-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: #ffffff; border: 1.5px solid var(--border);
+    padding: 0.4rem 0.6rem; border-radius: var(--radius);
+    transition: border-color 0.15s;
+  }
+  .priority-item:hover { border-color: var(--pink); }
+  .priority-word { flex: 1; font-weight: 700; font-size: 0.75rem; color: var(--fg); }
+  .prio-btn {
+    width: 1.5rem; height: 1.5rem; border-radius: 0.25rem;
+    background: #ffffff; border: 1.5px solid rgba(129,140,248,0.2); color: var(--muted);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .prio-btn svg { width: 0.8rem; height: 0.8rem; }
+  .prio-btn:hover:not(:disabled) { border-color: var(--pink); color: var(--pink); background: var(--pink-light); }
+  .prio-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+  .prio-btn.del:hover:not(:disabled) { color: var(--destructive); border-color: rgba(225,29,72,0.3); background: #fff1f2; }
+
+  /* ── Add manually ────────────────────────────────────────────── */
+  .add-form { display: flex; flex-direction: column; gap: 0.5rem; }
+  .add-form textarea { padding-left: 0.75rem; }
+  .add-btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  /* ── Bookmarklet ─────────────────────────────────────────────── */
+  .bookmarklet-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1.5px solid var(--border);
+    background: var(--pink-light);
+    color: var(--pink);
+    border-radius: var(--radius);
+    padding: 0.45rem 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: grab;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 2px 5px rgba(219,39,119,0.08);
+  }
+  .bookmarklet-link:active { cursor: grabbing; }
+  .bookmarklet-link svg { width: 0.8rem; height: 0.8rem; }
+  .bookmarklet-label {
+    font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 0.3rem;
+  }
+  pre.bm-code {
+    max-height: 8rem; overflow: auto;
+    background: #ffffff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.65rem;
+    font-size: 0.6rem;
+    color: var(--muted);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  pre.bm-code::-webkit-scrollbar { height: 3px; }
+  pre.bm-code::-webkit-scrollbar-thumb { background: var(--border); }
+  .accent { color: var(--blue-deep); font-weight: 700; }
+
+  /* ── Toasts ──────────────────────────────────────────────────── */
+  #toast-stack {
+    position: fixed; bottom: 1.25rem; left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    display: flex; flex-direction: column; gap: 0.5rem; align-items: center;
+    pointer-events: none;
+    width: min(22rem, 90vw);
+  }
+  .toast {
+    width: 100%;
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius);
+    font-size: 0.72rem; font-weight: 700;
+    pointer-events: auto;
+    animation: toastIn 0.3s ease both;
+    border: 1.5px solid;
+    box-shadow: 0 4px 12px rgba(107,78,141,0.15);
+  }
+  .toast.ok {
+    background: #ffffff;
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+  .toast.error {
+    background: #ffffff;
+    border-color: var(--destructive);
+    color: var(--destructive);
+  }
+  .toast svg { width: 0.85rem; height: 0.85rem; flex-shrink: 0; }
+
+  /* ── Butterfly SVG icon in header ────────────────────────────── */
+  .butterfly-icon {
+    width: 1.3rem; height: 1.3rem;
+    animation: wingFlap 1.5s ease-in-out infinite;
+  }
+
+  /* ── Glitter dots scattered ──────────────────────────────────── */
+  .glitter {
+    position: fixed;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: sparkle linear infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background atmosphere -->
+<div class="sparkle-field"></div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+<div class="butterfly-bg">🦋</div>
+
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <span class="header-icon">
+      <svg class="butterfly-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 12c-2-3-7-5-9-2s1 8 4 9c1.5.5 3-1 5-7zm0 0c2-3 7-5 9-2s-1 8-4 9c-1.5.5-3-1-5-7z"/>
+        <path d="M12 12c-1 3-2 8 0 10s1-7 0-10z" opacity="0.6"/>
+      </svg>
+    </span>
+    <h1>✦ Magnet Vault ✦</h1>
+  </header>
+
+  <!-- Pantry Cloud Config Banner -->
+  <div class="config-banner" id="config-banner">
+    <strong>✨ Pantry Cloud Setup Required! ✨</strong> Please configure connection parameters inside the <code>&lt;script&gt;</code> block at the bottom:<br>
+    - Set <code>PANTRY_ID</code> to your free ID from <a href="https://getpantry.cloud/" target="_blank" style="color:var(--blue-deep); font-weight:bold;">getpantry.cloud</a>.<br>
+    - Change <code>BASKET_NAME</code> to any database identifier (e.g. <code>magnet_vault</code>).
+  </div>
+
+  <!-- Filters -->
+  <section class="filter-section" aria-label="Filters">
+    <div class="filter-row">
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="filter-show" placeholder="show name (e.g. the wire)" aria-label="Filter by show name" />
+      </div>
+      <div class="input-wrap">
+        <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="filter-term" placeholder="all keywords (e.g. S03 1080p)" aria-label="Filter by keywords" />
+      </div>
+    </div>
+    <div class="input-wrap">
+      <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="filter-or" placeholder="exact keywords, space separated — match ANY (e.g. 2160p REPACK x265)" aria-label="Filter exact OR" />
+    </div>
+  </section>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-dot disconnected" id="status-dot"></span>
+    <span class="status-label disconnected" id="status-label">Disconnected</span>
+    <span class="status-count" id="status-count">0 / 0 shown</span>
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <button class="btn" id="btn-copy-all" onclick="handleCopyAll()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+      Copy All
+    </button>
+    <button class="btn" onclick="handleSortEpisode()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+      Sort by Episode
+    </button>
+    <button class="btn" id="btn-dedupe" onclick="handleDedupe()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/><path d="M10 20v-5h4v5"/></svg>
+      Dedupe
+    </button>
+    <button class="btn" id="sync-btn" onclick="handleSync()">
+      <svg id="sync-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+      Sync
+    </button>
+    <button class="btn btn-danger" onclick="handlePurge()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      Purge
+    </button>
+  </div>
+
+  <!-- Link list -->
+  <div id="link-container"></div>
+
+  <!-- Dedupe priority -->
+  <details>
+    <summary>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      Dedupe Priority Words
+    </summary>
+    <div class="collapsible-body">
+      <p class="hint">
+        When duplicate episodes are found, the copy whose link contains the highest-ranking priority word is kept. Use arrows to rank.
+      </p>
+      
+      <!-- Priority Words interactive list -->
+      <div id="priority-container" class="priority-list"></div>
+      
+      <!-- Add new priority -->
+      <div class="add-btn-row">
+        <div class="input-wrap" style="flex: 1;">
+          <input type="text" id="new-priority-word" placeholder="Add priority keyword..." aria-label="Add priority word" style="padding-left:0.75rem" onkeydown="if(event.key==='Enter') addPriorityWord()" />
+        </div>
+        <button class="btn btn-primary" onclick="addPriorityWord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>
+          Add
+        </button>
+      </div>
+
+    </div>
+  </details>
+
+  <!-- Add manually -->
+  <details id="add-panel">
+    <summary>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      Add Links Manually
+    </summary>
+    <div class="collapsible-body">
+      <div class="add-form">
+        <div class="input-wrap" style="flex:none">
+          <input type="text" id="add-title" placeholder="Title (auto-filled from magnet if blank)" aria-label="Title" style="padding-left:0.75rem" />
+        </div>
+        <textarea id="add-magnet" rows="3" placeholder="magnet:?xt=urn:btih:..." aria-label="Magnet URL"></textarea>
+        <div class="add-btn-row">
+          <button class="btn btn-primary" onclick="handleAdd()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5v14"/></svg>
+            Add
+          </button>
+          <button class="btn" onclick="handlePasteAdd()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M6 20V10l6-8 6 8v10"/><path d="M10 20v-5h4v5"/></svg>
+            Add all pasted
+          </button>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- Browser integration -->
+  <details>
+    <summary>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      Browser Integration
+    </summary>
+    <div class="collapsible-body">
+      <p class="hint">
+        Drag the button below to your bookmarks bar. On any page with magnet
+        links, click it to scan the page and send every magnet directly into your Pantry.
+      </p>
+      <a id="bookmarklet-btn" href="#" class="bookmarklet-link" draggable="true" onclick="return false">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c-2-3-7-5-9-2s1 8 4 9c1.5.5 3-1 5-7zm0 0c2-3 7-5 9-2s-1 8-4 9c-1.5.5-3-1-5-7z"/></svg>
+        + Save to Magnet Vault
+      </a>
+      <p class="bookmarklet-label">Bookmarklet source</p>
+      <pre class="bm-code" id="bm-code-pre"></pre>
+    </div>
+  </details>
+
+</div>
+
+<!-- Toast stack -->
+<div id="toast-stack"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CONFIG — Fill these parameters in before running
+// ═══════════════════════════════════════════════════════════════════════════════
+const CONFIG = {
+  PANTRY_ID:   “d297ed70-5536-4059-b8e7-a9561b208868'', // Get yours from https://getpantry.cloud/
+  BASKET_NAME: 'Maxine', // Choose any unique name for your storage
+};
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── State ─────────────────────────────────────────────────────────────────
+let links = [];
+let priorityWords = ['repack', 'proper', '2160p', '1080p'];
+let connected = false;
+let syncingState = false;
+
+const PRIO_STORAGE_KEY = 'magnet-vault-priority';
+
+function loadPriority() {
+  try {
+    const raw = localStorage.getItem(PRIO_STORAGE_KEY);
+    if (raw) priorityWords = JSON.parse(raw);
+  } catch { loadDefaultPriority(); }
+}
+function loadDefaultPriority() {
+  priorityWords = ['repack', 'proper', '2160p', '1080p'];
+}
+function savePriority() {
+  try { localStorage.setItem(PRIO_STORAGE_KEY, JSON.stringify(priorityWords)); } catch {}
+}
+
+loadPriority();
+
+// ── Pantry API Helpers ────────────────────────────────────────────────────────
+function pantryUrl() {
+  return `https://getpantry.cloud/apiv1/pantry/${CONFIG.PANTRY_ID}/basket/${CONFIG.BASKET_NAME}`;
+}
+
+function configOk() {
+  return CONFIG.PANTRY_ID !== '' && CONFIG.BASKET_NAME !== '';
+}
+
+// ── Synchronize (Live Pull and Push) ──────────────────────────────────────────
+async function fetchLinks() {
+  if (!configOk()) {
+    setConnectedState(false, 'Not Configured');
+    document.getElementById('config-banner').style.display = 'block';
+    return;
+  }
+  document.getElementById('config-banner').style.display = 'none';
+  setSyncing(true);
+  try {
+    const r = await fetch(pantryUrl());
+    if (r.status === 404) {
+      links = [];
+      setConnectedState(true, 'Connected (Empty)');
+      render();
+      pushToast('New vault initialized!', 'ok');
+    } else if (!r.ok) {
+      throw new Error(`Pantry GET → HTTP ${r.status} ${r.statusText}`);
+    } else {
+      const data = await r.json();
+      links = data.links || [];
+      setConnectedState(true, 'Connected');
+      render();
+      pushToast('Vault synced!', 'ok');
+    }
+  } catch(e) {
+    setConnectedState(false, 'Disconnected');
+    pushToast('Sync failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function saveToPantry(newLinks) {
+  const r = await fetch(pantryUrl(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ links: newLinks }),
+  });
+  if (!r.ok) {
+    const errText = await r.text();
+    throw new Error(`Pantry POST → HTTP ${r.status}: ${errText}`);
+  }
+  return true;
+}
+
+// ── Utility: Parse Magnet Parameters ─────────────────────────────────────────
+function parseMagnetTitle(magnet) {
+  if (!magnet) return '';
+  const m = magnet.match(/[?&]dn=([^&]+)/i);
+  if (m) {
+    let raw = m[1].replace(/\+/g, ' ');
+    try { raw = decodeURIComponent(raw); } catch {}
+    return raw.replace(/[._]+/g, ' ').trim();
+  }
+  return '';
+}
+function isValidMagnet(v) {
+  const s = (v || '').trim();
+  return /^magnet:\?/i.test(s) && /xt=urn:btih:[a-z0-9]+/i.test(s);
+}
+function parseSeasonEpisode(title) {
+  if (!title) return null;
+  let m = title.match(/s(\d{1,2})[\s._-]*e(\d{1,3})/i);
+  if (m) return { season: parseInt(m[1], 10), episode: parseInt(m[2], 10) };
+  m = title.match(/\b(\d{1,2})x(\d{1,3})\b/i);
+  if (m) return { season: parseInt(m[1], 10), episode: parseInt(m[2], 10) };
+  return null;
+}
+
+function stripShowName(title) {
+  if (!title) return '';
+  let name = title.replace(/[._]+/g, ' ');
+  const seMatch = name.match(/\b(s\d{1,2}[\s._-]*e\d{1,3}|season[\s._-]*\d{1,2}|\bs\d{1,2}\b|\b\d{1,2}x\d{1,3})\b/i);
+  if (seMatch && seMatch.index !== undefined) {
+    name = name.slice(0, seMatch.index);
+  }
+  return name.replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function episodeKey(title) {
+  const show = stripShowName(title);
+  const se = parseSeasonEpisode(title);
+  if (se) return `${show}|s${String(se.season).padStart(2,'0')}e${String(se.episode).padStart(2,'0')}`;
+  return show || title.toLowerCase().trim();
+}
+
+// ── Filtering ─────────────────────────────────────────────────────────────
+function getFiltered() {
+  const show  = (document.getElementById('filter-show').value  || '').trim().toLowerCase();
+  const terms = (document.getElementById('filter-term').value  || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const orTerms = (document.getElementById('filter-or').value  || '').trim().split(/\s+/).map(t=>t.trim().toLowerCase()).filter(Boolean);
+
+  return links.filter(l => {
+    const ht = l.title.toLowerCase();
+    const hf = `${l.title} ${l.magnet}`.toLowerCase();
+    if (show) {
+      const cn = stripShowName(l.title);
+      if (!cn.includes(show) && !ht.includes(show)) return false;
+    }
+    if (terms.length) for (const t of terms) if (!hf.includes(t)) return false;
+    if (orTerms.length && !orTerms.some(t => hf.includes(t))) return false;
+    return true;
+  });
+}
+function isFilterActive() {
+  return ['filter-show','filter-term','filter-or'].some(id => (document.getElementById(id).value||'').trim() !== '');
+}
+
+// ── Render UI ─────────────────────────────────────────────────────────────
+function render() {
+  const filtered = getFiltered();
+
+  const dot   = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  dot.className   = 'status-dot ' + (connected ? 'connected' : 'disconnected');
+  label.className = 'status-label ' + (connected ? 'connected' : 'disconnected');
+  
+  if (syncingState) {
+    label.textContent = 'Syncing...';
+  } else {
+    label.textContent = connected ? 'Connected' : 'Disconnected';
+  }
+
+  document.getElementById('status-count').textContent = `${filtered.length} / ${links.length} shown`;
+  document.getElementById('btn-dedupe').childNodes[1].textContent = isFilterActive() ? ' Dedupe (filtered)' : ' Dedupe';
+
+  const container = document.getElementById('link-container');
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">✦ No magnet links found. Add some below! ✦</div>`;
+    return;
+  }
+  container.innerHTML = `<ul class="link-list-wrap" role="list">${filtered.map(linkRowHTML).join('')}</ul>`;
+}
+
+function linkRowHTML(l) {
+  const se = parseSeasonEpisode(l.title);
+  const epBadge = se ? `<span class="ep-badge">S${String(se.season).padStart(2,'0')}E${String(se.episode).padStart(2,'0')}</span>` : '';
+  const date = new Date(l.createdAt).toLocaleString();
+  const titleEsc = escHtml(l.title || '(untitled)');
+  const magnetEsc = escHtml(l.magnet);
+  return `
+  <li class="link-row">
+    <div class="link-row-inner">
+      <div class="link-meta">
+        <div class="link-title-wrap">
+          <span class="link-title">${titleEsc}</span>${epBadge}
+        </div>
+        <p class="link-magnet">${magnetEsc}</p>
+        <p class="link-date">${escHtml(date)}</p>
+      </div>
+      <div class="link-actions">
+        <button class="icon-btn" onclick="copyText(${JSON.stringify(l.magnet)}, 'Link copied')" aria-label="Copy link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        </button>
+        <button class="icon-btn del" onclick="handleDelete('${l.id}')" aria-label="Delete link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6l-1 14H6L5 6M10 11v6M14 11v6M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>
+  </li>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Priority List Render ──────────────────────────────────────────────────
+function renderPriorityList() {
+  const container = document.getElementById('priority-container');
+  if(!priorityWords.length) {
+      container.innerHTML = '<div class="empty-state" style="padding: 1rem; font-size: 0.7rem;">No priority words set.</div>';
+      return;
+  }
+  container.innerHTML = priorityWords.map((word, index) => `
+    <div class="priority-item">
+      <span class="priority-word">${escHtml(word.toUpperCase())}</span>
+      <button class="prio-btn" onclick="movePriority(${index}, -1)" ${index === 0 ? 'disabled' : ''} aria-label="Move up">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+      </button>
+      <button class="prio-btn" onclick="movePriority(${index}, 1)" ${index === priorityWords.length - 1 ? 'disabled' : ''} aria-label="Move down">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button class="prio-btn del" onclick="removePriority(${index})" aria-label="Remove">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+function movePriority(index, dir) {
+  if (index + dir < 0 || index + dir >= priorityWords.length) return;
+  const temp = priorityWords[index];
+  priorityWords[index] = priorityWords[index + dir];
+  priorityWords[index + dir] = temp;
+  savePriority();
+  renderPriorityList();
+}
+
+function removePriority(index) {
+  priorityWords.splice(index, 1);
+  savePriority();
+  renderPriorityList();
+}
+
+function addPriorityWord() {
+  const input = document.getElementById('new-priority-word');
+  const word = input.value.trim().toLowerCase();
+  if (word && !priorityWords.includes(word)) {
+      priorityWords.push(word);
+      savePriority();
+      renderPriorityList();
+      input.value = '';
+  }
+}
+
+// ── Toast Stack ───────────────────────────────────────────────────────────
+function pushToast(message, kind = 'ok') {
+  const stack = document.getElementById('toast-stack');
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  const icon = kind === 'ok'
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>`;
+  el.innerHTML = `${icon}<span>${escHtml(message)}</span>`;
+  stack.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ── UI Actions & Sync Hooks ───────────────────────────────────────────────
+function setConnectedState(ok, text = '') {
+  connected = ok;
+  const dot   = document.getElementById('status-dot');
+  const label = document.getElementById('status-label');
+  if (dot && label) {
+    dot.className   = 'status-dot ' + (ok ? 'connected' : 'disconnected');
+    label.className = 'status-label ' + (ok ? 'connected' : 'disconnected');
+    label.textContent = text || (ok ? 'Connected' : 'Disconnected');
+  }
+}
+
+function setSyncing(on) {
+  syncingState = on;
+  const icon = document.getElementById('sync-icon');
+  const btn = document.getElementById('sync-btn');
+  btn.disabled = on;
+  if (on) {
+    icon.classList.add('spin');
+  } else {
+    icon.classList.remove('spin');
+  }
+  render();
+}
+
+function copyText(text, label = 'Copied') {
+  navigator.clipboard.writeText(text).then(() => pushToast(label)).catch(() => pushToast('Clipboard copy failed', 'error'));
+}
+
+function handleCopyAll() {
+  const filtered = getFiltered();
+  if (!filtered.length) { pushToast('Nothing to copy', 'error'); return; }
+  copyText(filtered.map(l => l.magnet).join('\n'), `Copied ${filtered.length} link(s)`);
+}
+
+function handleSortEpisode() {
+  links.sort((a, b) => {
+    const sa = parseSeasonEpisode(a.title), sb = parseSeasonEpisode(b.title);
+    if (!sa && !sb) return a.title.localeCompare(b.title);
+    if (!sa) return 1; if (!sb) return -1;
+    const sc = stripShowName(a.title).localeCompare(stripShowName(b.title));
+    if (sc !== 0) return sc;
+    if (sa.season !== sb.season) return sa.season - sb.season;
+    return sa.episode - sb.episode;
+  });
+  render(); pushToast('Sorted by season + episode');
+}
+
+async function handleDedupe() {
+  if (!configOk()) { pushToast('Fill in CONFIG first', 'error'); return; }
+  
+  const score = item => {
+    const hay = `${item.title} ${item.magnet}`.toLowerCase();
+    for (let i = 0; i < priorityWords.length; i++) {
+        if (hay.includes(priorityWords[i])) return priorityWords.length - i;
+    }
+    return 0;
+  };
+  
+  const scope = isFilterActive() ? getFiltered() : links;
+  const scopeIds = new Set(scope.map(l => l.id));
+  const groups = new Map();
+  
+  for (const item of scope) {
+    const key = episodeKey(item.title);
+    (groups.get(key) || groups.set(key, []).get(key)).push(item);
+  }
+  
+  const keptLinks = [];
+  let duplicatesRemoved = 0;
+
+  for (const arr of groups.values()) {
+    if (arr.length < 2) {
+      keptLinks.push(arr[0]);
+      continue;
+    }
+    let keeper = arr[0];
+    for (const item of arr) {
+      const s = score(item), ks = score(keeper);
+      if (s > ks || (s === ks && parseFloat(item.id) < parseFloat(keeper.id))) {
+        keeper = item;
+      }
+    }
+    keptLinks.push(keeper);
+    duplicatesRemoved += (arr.length - 1);
+  }
+
+  if (duplicatesRemoved === 0) { pushToast('No duplicates found'); return; }
+
+  setSyncing(true);
+  try {
+    // Reconstruct the full pool, keeping unaffected elements outside target scope
+    const nextLinks = isFilterActive() 
+      ? links.filter(l => !scopeIds.has(l.id)).concat(keptLinks) 
+      : keptLinks;
+
+    await saveToPantry(nextLinks);
+    links = nextLinks;
+    render();
+    pushToast(`Removed ${duplicatesRemoved} duplicate(s)!`, 'ok');
+  } catch(e) {
+    pushToast('Dedupe failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+function handleSync() {
+  fetchLinks();
+}
+
+async function handlePurge() {
+  if (!configOk()) { pushToast('Fill in CONFIG first', 'error'); return; }
+  if (!links.length) { pushToast('Vault already empty', 'error'); return; }
+  if (!confirm(`Purge ALL ${links.length} link(s) from Pantry? This cannot be undone.`)) return;
+  
+  setSyncing(true);
+  try {
+    const r = await fetch(pantryUrl(), { method: 'DELETE' });
+    if (!r.ok && r.status !== 404) throw new Error(`Pantry DELETE → HTTP ${r.status}`);
+    links = [];
+    render();
+    pushToast('Vault purged', 'ok');
+  } catch(e) {
+    pushToast('Purge failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function handleDelete(id) {
+  if (!configOk()) { pushToast('Fill in CONFIG first', 'error'); return; }
+  setSyncing(true);
+  try {
+    const nextLinks = links.filter(l => l.id !== String(id));
+    await saveToPantry(nextLinks);
+    links = nextLinks;
+    render();
+    pushToast('Link deleted', 'ok');
+  } catch(e) {
+    pushToast('Delete failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function handleAdd() {
+  if (!configOk()) { pushToast('Fill in CONFIG first', 'error'); return; }
+  const magnetEl = document.getElementById('add-magnet');
+  const titleEl  = document.getElementById('add-title');
+  const m = (magnetEl.value || '').trim();
+  if (!isValidMagnet(m)) { pushToast('Invalid magnet URL', 'error'); return; }
+  const title = (titleEl.value || '').trim() || parseMagnetTitle(m) || '(untitled)';
+  
+  setSyncing(true);
+  try {
+    const newLink = {
+      id: String(Date.now() + Math.random()),
+      title: title,
+      magnet: m,
+      createdAt: new Date().toISOString()
+    };
+    const nextLinks = [newLink, ...links];
+    await saveToPantry(nextLinks);
+    links = nextLinks;
+    titleEl.value = '';
+    magnetEl.value = '';
+    render();
+    pushToast('Link added to Pantry!', 'ok');
+  } catch(e) {
+    pushToast('Add failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+async function handlePasteAdd() {
+  if (!configOk()) { pushToast('Fill in CONFIG first', 'error'); return; }
+  const blob = (document.getElementById('add-magnet').value || '').trim();
+  const candidates = blob.split(/\s+/).map(s => s.trim()).filter(s => isValidMagnet(s));
+  if (!candidates.length) { pushToast('No valid magnet links found', 'error'); return; }
+  
+  const existingUrls = new Set(links.map(l => l.magnet));
+  const toAdd = candidates.filter(s => !existingUrls.has(s));
+  const skipped = candidates.length - toAdd.length;
+  if (!toAdd.length) { pushToast(`All ${skipped} link(s) already in vault`, 'ok'); return; }
+
+  setSyncing(true);
+  try {
+    const newLinks = toAdd.map(s => ({
+      id: String(Date.now() + Math.random()),
+      title: parseMagnetTitle(s) || s.slice(0, 160),
+      magnet: s,
+      createdAt: new Date().toISOString()
+    }));
+    const nextLinks = [...newLinks, ...links];
+    await saveToPantry(nextLinks);
+    links = nextLinks;
+    document.getElementById('add-magnet').value = '';
+    document.getElementById('add-title').value  = '';
+    render();
+    pushToast(`Added ${newLinks.length} link(s)${skipped ? `, skipped ${skipped} duplicate(s)` : ''}`, 'ok');
+  } catch(e) {
+    pushToast('Paste failed: ' + e.message, 'error');
+  } finally {
+    setSyncing(false);
+  }
+}
+
+// ── Bookmarklet ───────────────────────────────────────────────────────────
+function setupBookmarklet() {
+  const pantryId = CONFIG.PANTRY_ID || 'YOUR_PANTRY_ID';
+  const basketName = CONFIG.BASKET_NAME || 'YOUR_BASKET_NAME';
+  
+  const code = `javascript:(function(){var a=[].slice.call(document.querySelectorAll('a[href^="magnet:"]'));if(!a.length){alert('No magnet links found on this page');return;}var l=a.map(function(x){var m=x.href;var dn=(m.match(/[?&]dn=([^&]+)/i)||[])[1]||'';var t=dn?decodeURIComponent(dn.replace(/\\+/g,' ')).replace(/[._]+/g,' ').trim():(x.textContent||'').trim();return{id:String(Date.now()+Math.random()),title:t,magnet:m,createdAt:new Date().toISOString()};});var url='https://getpantry.cloud/apiv1/pantry/${pantryId}/basket/${basketName}';fetch(url).then(function(r){return r.status===404?{links:[]}:r.json();}).then(function(d){var existing=d.links||[];var combined=l.concat(existing);return fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({links:combined})});}).then(function(){alert('Saved '+l.length+' magnet link(s) to Magnet Vault!');}).catch(function(e){alert('Failed to save to Pantry: '+e.message);});})();`;
+  
+  const btn = document.getElementById('bookmarklet-btn');
+  btn.href = code;
+  btn.setAttribute('draggable', 'true');
+  document.getElementById('bm-code-pre').textContent = code;
+}
+
+// ── Magnet auto-fill title ────────────────────────────────────────────────
+document.getElementById('add-magnet').addEventListener('input', function() {
+  const titleEl = document.getElementById('add-title');
+  if (!titleEl.value.trim()) {
+    const parsed = parseMagnetTitle(this.value);
+    if (parsed) titleEl.value = parsed;
+  }
+});
+
+// ── Filter listeners ──────────────────────────────────────────────────────
+['filter-show','filter-term','filter-or'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+// ── Scattered glitter dots ────────────────────────────────────────────────
+(function spawnGlitter() {
+  const colors = ['#db2777','#4f46e5','#8b5cf6','#ec4899','#a78bfa','#3b82f6'];
+  for (let i = 0; i < 30; i++) {
+    const el = document.createElement('div');
+    el.className = 'glitter';
+    el.style.cssText = `
+      left: ${Math.random()*100}vw;
+      top: ${Math.random()*100}vh;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration: ${2+Math.random()*4}s;
+      animation-delay: ${-Math.random()*4}s;
+      box-shadow: 0 0 5px 2px ${colors[Math.floor(Math.random()*colors.length)]}55;
+    `;
+    document.body.appendChild(el);
+  }
+})();
+
+// ── Initial Connection Check & Render ─────────────────────────────────────
+render();
+renderPriorityList();
+setupBookmarklet();
+
+if (configOk()) {
+  fetchLinks();
+} else {
+  setConnectedState(false, 'Not Configured');
+}
+</script>
+</body>
+</html>
